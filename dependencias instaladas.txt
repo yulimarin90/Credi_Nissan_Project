@@ -1,0 +1,10 @@
+BACKEND
+npm install express cors dotenv jsonwebtoken bcrypt multer
+npm install -D nodemon
+npm install prisma @prisma/client
+
+
+
+
+FRONTEND
+npm create vite@latest frontend -- --template react
