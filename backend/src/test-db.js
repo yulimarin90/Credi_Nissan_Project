@@ -1,21 +1,24 @@
-const { pool } = require("./config/Database");
+const { pool, poolConnect } = require("./config/database");
 
 async function testConnection() {
   try {
-    const connection = await pool.connect();
 
-    const result = await connection
+    await poolConnect;
+
+    const result = await pool
       .request()
       .query("SELECT DB_NAME() AS BaseDatos");
 
     console.log(result.recordset);
 
-    process.exit(0);
-
   } catch (error) {
+
     console.error("ERROR:", error);
 
-    process.exit(1);
+  } finally {
+
+    await pool.close();
+
   }
 }
 
