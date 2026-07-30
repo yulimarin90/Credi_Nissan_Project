@@ -3,6 +3,9 @@ npm install express cors dotenv jsonwebtoken bcrypt multer
 npm install -D nodemon
 npm install prisma @prisma/client
 
+npm install mssql
+npm install xlsx
+npm install multer
 
 
 

@@ -1,39 +1,92 @@
-const xlsx = require("xlsx");
+const ExcelJS = require("exceljs");
 
-const excelMapper = require("../utils/excelMapper");
-const importadorRepository = require("../repository/importador.repository");
+const importadorRepository = require("../repository/repository");
 
 class ImportadorService {
 
     async importarExcel(rutaArchivo) {
 
-        console.log("Leyendo archivo...");
+        console.log("==================================");
+        console.log("Iniciando importación...");
+        console.log("Archivo:", rutaArchivo);
 
-        const workbook = xlsx.readFile(rutaArchivo);
+        const workbook = new ExcelJS.stream.xlsx.WorkbookReader(rutaArchivo);
 
-        const hoja = workbook.Sheets[workbook.SheetNames[0]];
+        let encabezados = [];
+        let total = 0;
+        let insertados = 0;
+        let existentes = 0;
 
-        const filas = xlsx.utils.sheet_to_json(hoja);
+        for await (const worksheet of workbook) {
 
-        console.log(`Se encontraron ${filas.length} registros.`);
+            console.log("Leyendo hoja:", worksheet.name);
 
-        for (const fila of filas) {
+            for await (const row of worksheet) {
 
-            const id_credit = fila[excelMapper.id_credit];
+                // Primera fila = encabezados
+                if (row.number === 1) {
 
-            const existe = await importadorRepository.buscarPorId(id_credit);
+                    encabezados = row.values.map(valor =>
+                        valor ? valor.toString().trim() : ""
+                    );
 
-            if (existe) {
+                    console.log("Encabezados cargados.");
+                    continue;
+                }
 
-                console.log(`El crédito ${id_credit} ya existe.`);
+                const fila = {};
 
-            } else {
+                row.values.forEach((valor, indice) => {
 
-                console.log(`El crédito ${id_credit} es nuevo.`);
+                    if (indice === 0) return;
+
+                    fila[encabezados[indice]] = valor;
+
+                });
+
+                total++;
+
+                const id_credit = fila["id_credit_form"];
+
+                if (!id_credit) {
+                    continue;
+                }
+
+                const existe = await importadorRepository.buscarPorId(id_credit);
+
+                if (!existe) {
+
+                    await importadorRepository.insertar(fila);
+
+                    insertados++;
+
+                    if (insertados <= 10) {
+                        console.log(`Insertado: ${id_credit}`);
+                    }
+
+                } else {
+
+                    existentes++;
+
+                    if (existentes <= 10) {
+                        console.log(`Ya existe: ${id_credit}`);
+                    }
+
+                }
+
+                if (total % 1000 === 0) {
+                    console.log(`${total} filas procesadas...`);
+                }
 
             }
 
         }
+
+        console.log("==================================");
+        console.log("Importación finalizada");
+        console.log("Total procesados:", total);
+        console.log("Insertados:", insertados);
+        console.log("Existentes:", existentes);
 
     }
 

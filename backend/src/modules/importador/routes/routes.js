@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 
-const importadorController = require("../controller/importador.controller");
+const importadorController = require("../controller/controller");
 
 const router = express.Router();
 

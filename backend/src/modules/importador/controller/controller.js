@@ -1,4 +1,4 @@
-const importadorService = require("../service/importador.service");
+const importadorService = require("../service/service");
 
 class ImportadorController {
 
