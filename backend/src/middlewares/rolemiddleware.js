@@ -1,19 +1,28 @@
-module.exports = (...rolesPermitidos) => {
+module.exports=(rolesPermitidos)=>{
 
-    return (req, res, next) => {
 
-        if (!rolesPermitidos.includes(req.usuario.rol)) {
+return(req,res,next)=>{
 
-            return res.status(403).json({
 
-                mensaje: "No tiene permisos."
+if(
+!rolesPermitidos.includes(req.usuario.rol)
+){
 
-            });
+return res.status(403).json({
 
-        }
+mensaje:
+"No tiene permisos"
 
-        next();
+});
 
-    };
+}
 
-};
+
+next();
+
+
+}
+
+
+
+}

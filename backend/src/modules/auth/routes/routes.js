@@ -28,4 +28,9 @@ router.patch(
     authController.desbloquearUsuario
 );
 
+router.patch(
+"/cambiar-password",
+authController.cambiarPassword
+);
+
 module.exports = router;

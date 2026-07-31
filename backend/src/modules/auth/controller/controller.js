@@ -41,6 +41,37 @@ class AuthController {
 
     }
 
+    async cambiarPassword(req,res){
+
+try{
+
+
+const resultado =
+await authService.cambiarPassword(
+req.body.id_usuario,
+req.body.password
+);
+
+
+res.json(resultado);
+
+
+
+}catch(error){
+
+
+res.status(400).json({
+
+mensaje:error.message
+
+});
+
+
+}
+
+
+}
+
     async activarUsuario(req, res) {
 
         try {

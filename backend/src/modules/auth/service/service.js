@@ -72,6 +72,7 @@ class AuthService {
         return {
 
             token,
+            cambiarPassword: usuario.primer_inicio,
 
             usuario: {
 
@@ -86,33 +87,74 @@ class AuthService {
 
     }
 
-    async crearUsuario(datos) {
+   async crearUsuario(datos) {
 
-        const existe = await authRepository.buscarPorCorreo(datos.correo);
 
-        if (existe) {
-            throw new Error("El correo ya se encuentra registrado.");
-        }
+    if(!datos.correo.endsWith("@adecco-mobilizefs.com.co")){
 
-        const passwordHash = await bcrypt.hash(datos.password, 10);
-
-        await authRepository.crearUsuario({
-
-            nombre_completo: datos.nombre_completo,
-            correo: datos.correo,
-            password_hash: passwordHash,
-            id_rol: datos.id_rol,
-            id_regional: datos.id_regional || null,
-            id_sala: datos.id_sala || null
-
-        });
-
-        return {
-            mensaje: "Usuario creado correctamente. Debe confirmar el correo y ser activado por el Coordinador Operativo."
-        };
+        throw new Error(
+            "Solo se permiten correos corporativos autorizados."
+        );
 
     }
 
+
+    const existe = await authRepository.buscarPorCorreo(datos.correo);
+
+
+    if (existe) {
+        throw new Error("El correo ya se encuentra registrado.");
+    }
+
+
+    const passwordHash = await bcrypt.hash(datos.password, 10);
+
+
+    await authRepository.crearUsuario({
+
+        nombre_completo: datos.nombre_completo,
+        correo: datos.correo,
+        password_hash: passwordHash,
+        id_rol: 1,
+        id_regional: datos.id_regional || null,
+        id_sala: datos.id_sala || null,
+        primer_inicio: 0
+
+    });
+
+
+    return {
+        mensaje:
+        "Usuario creado correctamente. Debe confirmar el correo y ser activado por el Coordinador Operativo."
+    };
+
+
+}
+
+async cambiarPassword(id_usuario,password){
+
+
+const passwordHash =
+await bcrypt.hash(password,10);
+
+
+
+await authRepository.actualizarPassword(
+id_usuario,
+passwordHash
+);
+
+
+
+return {
+
+mensaje:
+"Contraseña actualizada correctamente"
+
+};
+
+
+}
     async activarUsuario(idUsuario) {
 
         const usuario = await authRepository.buscarPorId(idUsuario);

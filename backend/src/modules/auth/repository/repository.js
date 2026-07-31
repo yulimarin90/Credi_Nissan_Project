@@ -33,6 +33,7 @@ class AuthRepository {
             .input("idRol", sql.Int, usuario.id_rol)
             .input("idRegional", sql.Int, usuario.id_regional)
             .input("idSala", sql.Int, usuario.id_sala)
+            .input("primerInicio", sql.Bit, usuario.primer_inicio)
 
             .query(`
                 INSERT INTO Usuarios
@@ -43,6 +44,7 @@ class AuthRepository {
                     id_rol,
                     id_regional,
                     id_sala,
+                    primer_inicio,
                     activo,
                     correo_confirmado,
                     bloqueado,
@@ -58,6 +60,7 @@ class AuthRepository {
                     @idRol,
                     @idRegional,
                     @idSala,
+                    @primerInicio,
                     0,
                     0,
                     0,
@@ -194,6 +197,31 @@ class AuthRepository {
 
     }
 
+    async actualizarPassword(idUsuario, passwordHash) {
+
+    await poolConnect;
+
+    await pool.request()
+
+        .input("id", sql.Int, idUsuario)
+
+        .input(
+            "password",
+            sql.VarChar,
+            passwordHash
+        )
+
+        .query(`
+            UPDATE Usuarios
+            SET
+                password_hash = @password,
+                primer_inicio = 0
+            WHERE id_usuario = @id
+        `);
+
 }
+
+}
+
 
 module.exports = new AuthRepository();
