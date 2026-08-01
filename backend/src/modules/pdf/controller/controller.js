@@ -15,24 +15,24 @@ try{
     const resultado =
     await pdfService.escanear(
         req.file,
-        idAsesor
+        req.usuario.id
     );
 
 
     res.json(resultado);
 
 
-}catch (error) {
+}catch(error){
 
-    console.error(error);
+    console.log("ERROR EN CONTROLLER:", error.message);
 
-    res.status(500).json({
-        mensaje: error.message,
-        stack: error.stack
+    return res.status(400).json({
+
+        mensaje: error.message
+
     });
 
 }
-
 
 }
 

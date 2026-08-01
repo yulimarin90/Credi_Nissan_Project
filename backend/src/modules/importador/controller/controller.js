@@ -12,10 +12,11 @@ class ImportadorController {
                 });
             }
 
-            await importadorService.importarExcel(req.file.path);
+            const resultado = await importadorService.importarExcel(req.file.path);
 
             return res.status(200).json({
-                mensaje: "Importación finalizada correctamente."
+                mensaje: `Importación finalizada: ${resultado.insertados} nuevos y ${resultado.actualizados} actualizados.`,
+                ...resultado
             });
 
         } catch (error) {

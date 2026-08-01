@@ -49,6 +49,8 @@ class PdfService {
                 idCredito
             );
 
+        const solicitudNueva = !solicitud;
+
 
 
         if(!solicitud){
@@ -69,9 +71,16 @@ class PdfService {
 
         }
 
+        // `estado` pertenece al vehículo y no participa en este flujo.
+        // Solo una solicitud nueva recibe el estatus inicial del seguimiento.
+        if (solicitudNueva) {
+            await repository.inicializarEstatusGeneral(idCredito);
+            solicitud = await repository.buscarSolicitud(idCredito);
+        }
 
 
-        const existe =
+
+        let existe =
         await repository.buscarSeguimiento(
             idCredito
         );
@@ -88,8 +97,7 @@ class PdfService {
 
 
 
-        const seguimiento =
-        await repository.crearSeguimiento({
+        const seguimiento = await repository.crearSeguimiento({
 
             id_credit_form:idCredito,
 
@@ -102,7 +110,7 @@ class PdfService {
         await repository.guardarDocumento({
 
             id_seguimiento:
-            seguimiento.id_seguimiento,
+            seguimiento.seguimiento.id_seguimiento,
 
             nombre_archivo:
             archivo.originalname,
@@ -117,7 +125,9 @@ class PdfService {
         return {
 
             mensaje:
-            "Seguimiento creado correctamente",
+            solicitudNueva
+                ? "Seguimiento creado correctamente"
+                : "Seguimiento registrado correctamente",
 
             solicitud,
 

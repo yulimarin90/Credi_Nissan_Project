@@ -66,6 +66,8 @@ class ImportadorService {
 
                 } else {
 
+                    await importadorRepository.actualizar(fila);
+
                     existentes++;
 
                     if (existentes <= 10) {
@@ -87,6 +89,12 @@ class ImportadorService {
         console.log("Total procesados:", total);
         console.log("Insertados:", insertados);
         console.log("Existentes:", existentes);
+
+        return {
+            total,
+            insertados,
+            actualizados: existentes
+        };
 
     }
 

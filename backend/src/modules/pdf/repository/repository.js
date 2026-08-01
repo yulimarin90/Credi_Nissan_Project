@@ -40,6 +40,29 @@ class PdfRepository {
 
 
 
+    async inicializarEstatusGeneral(id_credit) {
+
+        await poolConnect;
+
+        await pool.request()
+
+        .input(
+            "id",
+            sql.Int,
+            id_credit
+        )
+
+        .query(`
+
+            UPDATE SolicitudesCredito
+            SET estatus_general = 'En estudio'
+            WHERE id_credit = @id
+            AND estatus_general IS NULL
+
+        `);
+
+    }
+
     async buscarSeguimiento(id_credit) {
 
         await poolConnect;
@@ -61,7 +84,6 @@ class PdfRepository {
             FROM Seguimientos
 
             WHERE id_credit_form = @id
-            AND activo = 1
 
         `);
 
@@ -72,53 +94,55 @@ class PdfRepository {
 
 
 
-    async crearSeguimiento(data) {
+   async crearSeguimiento(data) {
 
-        await poolConnect;
+    await poolConnect;
 
 
-        const result =
-        await pool.request()
+    const result =
+    await pool.request()
 
-        .input(
-            "credito",
-            sql.Int,
-            data.id_credit_form
+    .input(
+        "credito",
+        sql.Int,
+        data.id_credit_form
+    )
+
+    .input(
+        "asesor",
+        sql.Int,
+        data.id_asesor
+    )
+
+    .query(`
+
+        INSERT INTO Seguimientos
+        (
+            id_credit_form,
+            id_asesor,
+            fecha_escaneo,
+            activo
         )
 
-        .input(
-            "asesor",
-            sql.Int,
-            data.id_asesor
+        OUTPUT INSERTED.*
+
+        VALUES
+        (
+            @credito,
+            @asesor,
+            GETDATE(),
+            1
         )
 
-        .query(`
-
-            INSERT INTO Seguimientos
-            (
-                id_credit_form,
-                id_asesor,
-                fecha_escaneo,
-                activo
-            )
-
-            OUTPUT INSERTED.*
-
-            VALUES
-            (
-                @credito,
-                @asesor,
-                GETDATE(),
-                1
-            )
-
-        `);
+    `);
 
 
-        return result.recordset[0];
+    return {
+        mensaje:"Seguimiento creado correctamente",
+        seguimiento: result.recordset[0]
+    };
 
-    }
-
+}
 
 
     async guardarDocumento(data){
@@ -164,7 +188,9 @@ class PdfRepository {
                 GETDATE()
             )
 
-        `);
+        `
+        
+    );
 
         }
 async crearSolicitud(datos){
@@ -269,6 +295,12 @@ async crearSolicitud(datos){
         datos.cuota_normal
     )
 
+    .input(
+        "estatus_general",
+        sql.VarChar(100),
+        "En estudio"
+    )
+
 
     .query(`
 
@@ -290,6 +322,7 @@ async crearSolicitud(datos){
             servicio,
             plan_financiero,
             cuota_normal,
+            estatus_general,
             fecha_sincronizacion
         )
 
@@ -311,6 +344,7 @@ async crearSolicitud(datos){
             @servicio,
             @plan_financiero,
             @cuota_normal,
+            @estatus_general,
             GETDATE()
         )
 
